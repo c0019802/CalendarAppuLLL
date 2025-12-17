@@ -1,0 +1,25 @@
+<%- include('layout', { body: `
+    <section class="panel small">
+      <h2>Edit Event – ${group.name}</h2>
+    
+      <form method="post" action="/groups/${group.id}/events/${event.id}/edit">
+        <label>Title
+          <input name="title" value="${event.title}" required>
+        </label>
+        <label>Description
+          <input name="description" value="${event.description || ''}">
+        </label>
+        <label>Starts
+          <input type="datetime-local" name="starts_at" value="${event.starts_at.slice(0,16)}" required>
+        </label>
+        <label>Ends
+          <input type="datetime-local" name="ends_at" value="${event.ends_at ? event.ends_at.slice(0,16) : ''}">
+        </label>
+        <button>Save changes</button>
+      </form>
+    
+      <p><a href="/groups/${group.id}">Back to group</a></p>
+    </section>
+    ` }) %>
+    
+    

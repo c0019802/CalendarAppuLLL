@@ -1,0 +1,11 @@
+<%- include('layout', { body: `
+  <section class="panel small">
+    <h2>Create New Group</h2>
+    ${error ? `<p class="error">${error}</p>` : ''}
+    <form method="post" action="/groups/new">
+      <label>Group name <input name="name" required></label>
+      <button>Create</button>
+    </form>
+  </section>
+  ` }) %>
+  
