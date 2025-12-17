@@ -1,0 +1,30 @@
+<%- include('layout', { body: `
+<section class="panel small">
+  <h2>Forgot Password</h2>
+  ${error ? `<p class="error">${error}</p>` : ''}
+
+  ${step === 'request' ? `
+    <form method="post" action="/forgot">
+      <label>Confirm email
+        <input type="email" name="email" value="${email || ''}" required>
+      </label>
+      <button type="submit">Send code</button>
+    </form>
+  ` : ''}
+
+    ${step === 'verify' ? `
+    <form method="post" action="/forgot/verify">
+      <input type="hidden" name="email" value="${email}">
+      <label>Verification code
+        <input type="text" name="code" maxlength="6" required>
+      </label>
+      <label>New password
+        <input type="password" name="password" required>
+      </label>
+      <button type="submit">Reset password</button>
+    </form>
+    <p>We sent a 6-digit code to your email.</p>
+    ${devCode ? `<p><small>Dev only: code is ${devCode}</small></p>` : ''}
+  ` : ''}
+</section>
+` }) %>

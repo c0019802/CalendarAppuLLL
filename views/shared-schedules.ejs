@@ -1,0 +1,152 @@
+<%- include('layout', { body: `
+    <h2>Shared Schedules</h2>
+    <div class="split">
+      <aside>
+        <h3>My groups</h3>
+        <ul>
+          ${groups.map(g=>`<li><a href="/groups/${g.id}">${g.name}</a> ${g.role==='admin' ? '🛡️' : ''}</li>`).join('') || '<li>None</li>'}
+        </ul>
+        <p><a class="button" href="/groups/new/create">+ Create New Group</a></p>
+      </aside>
+    
+      <section class="panel group-panel">
+        ${!active ? '<p>Select a group.</p>' : `
+          <h3>${active.name}</h3>
+    
+          <div class="grid">
+            <div>
+              <h4>Upcoming Group Events</h4>
+              <ul class="group-events">
+      ${
+        events.length
+          ? events.map(e => {
+              const isAdminUser = members.find(x => x.id === user.id && x.role === 'admin');
+    
+              const rsvpSummary =
+                (e.rsvpYes || e.rsvpNo || e.rsvpMaybe)
+                  ? `
+                    <span class="tag">Yes: ${e.rsvpYes}</span>
+                    <span class="tag">Maybe: ${e.rsvpMaybe}</span>
+                    <span class="tag">No: ${e.rsvpNo}</span>
+                  `
+                  : '';
+    
+              const youTag = e.my_response
+                ? `<span class="tag tag-outline">You: ${e.my_response}</span>`
+                : '';
+    
+              const adminControls = isAdminUser
+      ? `
+        <div class="event-admin-actions">
+          ${
+            e.status !== 'cancelled'
+              ? `<form method="post" action="/groups/${active.id}/events/${e.id}/cancel">
+                   <button type="submit">Cancel</button>
+                 </form>`
+              : ''
+          }
+          <a href="/groups/${active.id}/events/${e.id}/edit" class="button button-small">Edit</a>
+          <form method="post"
+                action="/groups/${active.id}/events/${e.id}/delete"
+                onsubmit="return confirm('Delete this event permanently?');">
+            <button type="submit" class="button-small" style="background:#b91c1c">Delete</button>
+          </form>
+        </div>
+      `
+      : '';
+    
+              const adminRsvps =
+                isAdminUser && e.rsvps && e.rsvps.length
+                  ? `
+                    <details class="event-rsvps">
+                      <summary>View RSVPs</summary>
+                      <ul>
+                        ${e.rsvps
+                          .map(r => `<li>${r.name} (${r.email}) – ${r.response}</li>`)
+                          .join('')}
+                      </ul>
+                    </details>
+                  `
+                  : '';
+    
+              return `
+                <li class="group-event ${e.status === 'cancelled' ? 'is-cancelled' : ''}">
+                  <div class="event-main">
+                    <div class="event-title-row">
+                      <span class="event-title">${e.title}</span>
+                      ${
+                        e.status === 'cancelled'
+                          ? '<span class="tag tag-red">Cancelled</span>'
+                          : ''
+                      }
+                    </div>
+                    <div class="event-meta">
+                      <span>${new Date(e.starts_at).toLocaleString()}</span>
+                      ${e.creator ? `<span> • by ${e.creator}</span>` : ''}
+                    </div>
+                    <div class="event-rsvp-summary">
+                      ${rsvpSummary}
+                      ${youTag}
+                    </div>
+                    ${adminRsvps}
+                  </div>
+                  <div class="event-actions">
+                    <form method="post"
+                          action="/groups/${active.id}/events/${e.id}/rsvp"
+                          class="rsvp-buttons">
+                      <button name="response" value="yes" type="submit">Going</button>
+                      <button name="response" value="maybe" type="submit">Maybe</button>
+                      <button name="response" value="no" type="submit">Can't</button>
+                    </form>
+                    ${adminControls}
+                  </div>
+                </li>
+              `;
+            }).join('')
+          : '<li class="muted">No group events yet.</li>'
+      }
+    </ul>
+            </div>
+    
+            <div>
+              <h4>Add new event</h4>
+              <form method="post" action="/groups/${active.id}/events">
+                <label>Title <input name="title" required></label>
+                <label>Description <input name="description"></label>
+                <label>Starts <input type="datetime-local" name="starts_at" required></label>
+                <label>Ends <input type="datetime-local" name="ends_at"></label>
+                <button>Submit</button>
+              </form>
+            </div>
+          </div>
+    
+          <hr/>
+          <h4>Members</h4>
+          <ul>
+            ${members.map(m=>`<li>${m.name} (${m.email}) ${m.role==='admin'?'🛡️':''}
+              ${members.find(x=>x.id===user.id)?.role==='admin' && m.id!==user.id ? `
+                <form style="display:inline" method="post" action="/groups/${active.id}/members/${m.id}/remove">
+                  <button>Remove</button>
+                </form>` : ''}</li>`).join('')}
+          </ul>
+          ${
+      members.find(x => x.id === user.id)?.role === 'admin'
+        ? `
+          <hr/>
+          <form method="post" action="/groups/${active.id}/delete" onsubmit="return confirm('Delete this group and all its events?');">
+            <button type="submit" style="background:#c0392b">Delete group</button>
+          </form>
+        `
+        : ''
+    }
+    
+          ${members.find(x=>x.id===user.id)?.role==='admin' ? `
+            <form method="post" action="/groups/${active.id}/members">
+              <label>Add member by email <input type="email" name="email" required></label>
+              <button>Add</button>
+            </form>` : ''}
+        `}
+      </section>
+    </div>
+    ` }) %>
+    
