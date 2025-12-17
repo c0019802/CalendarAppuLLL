@@ -1,0 +1,37 @@
+<%- include('layout', { body: `
+    <h2>My Schedule</h2>
+    <div class="grid grid-3 my-schedule-columns">
+      <section>
+        <h3>Today's Events</h3>
+        <ul>
+          ${today.map(e=>`
+            <li>
+              <strong>${e.title}</strong> – ${new Date(e.starts_at).toLocaleString()}
+              <form style="display:inline" method="post" action="/schedules/me/events/${e.id}/delete">
+                <button>&times;</button>
+              </form>
+            </li>`).join('') || '<li>No events today</li>'}
+        </ul>
+      </section>
+    
+      <section>
+        <h3>Upcoming Events</h3>
+        <ul>
+          ${upcoming.map(e=>`<li><strong>${e.title}</strong> – ${new Date(e.starts_at).toLocaleString()}</li>`).join('') || '<li>None</li>'}
+        </ul>
+      </section>
+    
+      <section>
+        <h3>Create New Event</h3>
+        <form method="post" action="/schedules/me/events">
+          <label>Title <input name="title" required></label>
+          <label>Description <input name="description"></label>
+          <label>Starts <input type="datetime-local" name="starts_at" required></label>
+          <label>Ends <input type="datetime-local" name="ends_at"></label>
+          <button>Submit</button>
+        </form>
+      </section>
+    </div>
+    ` }) %>
+    
+    
