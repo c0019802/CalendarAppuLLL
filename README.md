@@ -73,7 +73,7 @@ Prerequisites
 •	npm
 Installation Steps
 Clone the repository
-git clone <repository-url>
+git clone <https://github.com/c0019802/CalendarAppuLLL.git>
 
 Navigate to project directory
 cd schedule-plus
