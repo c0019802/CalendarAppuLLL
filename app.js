@@ -1,10 +1,12 @@
-// app.js
+
 const express = require('express');
 const session = require('express-session');
 const SQLiteStore = require('connect-sqlite3')(session);
 const morgan = require('morgan');
 const methodOverride = require('method-override');
 const path = require('path');
+
+const compression = require('compression');
 
 const authRoutes = require('./routes/auth');
 const scheduleRoutes = require('./routes/schedules');
@@ -16,11 +18,14 @@ console.log('groupRoutes:', typeof groupRoutes);
 
 const app = express();
 
-// view engine
+
+app.use(compression());
+
+
 app.set('view engine', 'ejs');
 app.set('views', path.join(__dirname, 'views'));
 
-// middleware
+
 app.use(express.static('public'));
 app.use(express.urlencoded({ extended: true }));
 app.use(methodOverride('_method'));
@@ -33,16 +38,22 @@ app.use(session({
   cookie: { maxAge: 1000 * 60 * 60 * 24 * 7 }
 }));
 
-// expose user to templates
+
 app.use((req, res, next) => { res.locals.user = req.session.user || null; next(); });
 
-// routes
+
 app.use('/', authRoutes);
 app.use('/schedules', scheduleRoutes);
 app.use('/groups', groupRoutes);
 
-// default route
+
 app.get('/', (req, res) => res.redirect(req.session.user ? '/schedules/me' : '/login'));
 
-// start server
+
 app.listen(3000, () => console.log('http://localhost:3000'));
+
+app.use(express.static('public', {
+  maxAge: '1d',       // Cache CSS/images for 24h
+  etag: true,
+  lastModified: true
+}));
